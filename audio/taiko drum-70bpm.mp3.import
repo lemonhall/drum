@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://1butsjiyv203"
+path="res://.godot/imported/taiko drum-70bpm.mp3-63b9797a52d9ee68424817245901f170.mp3str"
+
+[deps]
+
+source_file="res://audio/taiko drum-70bpm.mp3"
+dest_files=["res://.godot/imported/taiko drum-70bpm.mp3-63b9797a52d9ee68424817245901f170.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

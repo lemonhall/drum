@@ -8,7 +8,7 @@ enum NoteType {
 }
 
 var note_type: NoteType = NoteType.DON
-var speed: float = 200.0
+var speed: float = 116.7  # 调整为适合70 BPM的速度 (1000像素 / 8.57秒 ≈ 116.7)
 var is_hit: bool = false
 
 @onready var sprite = $Sprite2D
@@ -17,6 +17,9 @@ var is_hit: bool = false
 # 音符颜色
 var don_color = Color.RED
 var ka_color = Color.BLUE
+
+# 击打区域位置
+var hit_zone_x = 1000.0
 
 func _ready():
 	# 添加到notes组
@@ -27,6 +30,12 @@ func _ready():
 	
 	# 连接信号
 	area_entered.connect(_on_area_entered)
+	
+	# 计算到达击打区域的时间
+	var travel_distance = hit_zone_x - position.x
+	var travel_time = travel_distance / speed
+	print("音符生成: 类型=", ("DON" if note_type == NoteType.DON else "KA"), 
+		  " 距离=", travel_distance, "px 预计", travel_time, "秒后到达")
 
 func setup_note_appearance():
 	# 创建圆形精灵
@@ -87,5 +96,8 @@ func hit():
 
 func get_distance_to_hit_zone() -> float:
 	# 计算到击打区域的距离
-	var hit_zone_x = 1000  # 击打区域的X坐标
-	return abs(position.x - hit_zone_x) 
+	return abs(position.x - hit_zone_x)
+
+# 设置音符速度（用于动态调整）
+func set_speed(new_speed: float):
+	speed = new_speed 

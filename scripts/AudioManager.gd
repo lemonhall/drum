@@ -22,7 +22,7 @@ var audio_files = {
 }
 
 # 背景音乐文件路径
-var bgm_file = "res://audio/bgm.ogg"
+var bgm_file = "res://audio/taiko drum-70bpm.mp3"
 
 # 预加载的音效
 var loaded_sounds = {}
