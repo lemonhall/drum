@@ -42,8 +42,9 @@ func start_game():
 	# 开始生成音符
 	note_spawner.start_spawning()
 	
-	# 播放背景音乐（如果有的话）
-	# audio_manager.play_bgm()
+	# 播放背景音乐
+	if audio_manager:
+		audio_manager.play_bgm()
 
 func _on_note_hit(note_type: String, timing_accuracy: float):
 	# 根据准确度计算分数
@@ -58,8 +59,7 @@ func _on_note_hit(note_type: String, timing_accuracy: float):
 	
 	update_ui()
 	
-	# 播放击鼓音效
-	play_drum_sound(note_type, timing_accuracy)
+	# 鼓声和完美音效已经在DrumController中播放了
 
 func _on_note_missed():
 	combo = 0
@@ -67,19 +67,7 @@ func _on_note_missed():
 	
 	# 播放错过音效
 	if audio_manager:
-		audio_manager.play_sfx(audio_manager.SFXType.MISS)
-
-func play_drum_sound(note_type: String, accuracy: float):
-	if not audio_manager:
-		return
-	
-	# 根据准确度选择音效
-	if accuracy >= 0.9:
-		audio_manager.play_sfx(audio_manager.SFXType.PERFECT)
-	elif note_type == "DON":
-		audio_manager.play_sfx(audio_manager.SFXType.DON_HIT)
-	elif note_type == "KA":
-		audio_manager.play_sfx(audio_manager.SFXType.KA_HIT)
+		audio_manager.play_feedback("MISS")
 
 func update_ui():
 	score_label.text = "分数: " + str(score)

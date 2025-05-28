@@ -9,46 +9,44 @@ var perfect_window = 50.0  # 完美判定窗口（像素）
 var good_window = 100.0    # 良好判定窗口（像素）
 var hit_zone_x = 1000.0    # 击打区域X坐标
 
-# 输入映射
-var don_keys = ["z", "x"]  # 红色音符按键
-var ka_keys = ["c", "v"]   # 蓝色音符按键
+# 音符类型常量
+const DON = 0
+const KA = 1
+
+# 获取AudioManager引用
+@onready var audio_manager = get_node("../AudioManager")
 
 func _ready():
-	# 设置输入映射
-	setup_input_map()
-
-func setup_input_map():
-	# 创建输入动作
-	if not InputMap.has_action("drum_don"):
-		InputMap.add_action("drum_don")
-		var event1 = InputEventKey.new()
-		event1.keycode = KEY_Z
-		InputMap.action_add_event("drum_don", event1)
-		var event2 = InputEventKey.new()
-		event2.keycode = KEY_X
-		InputMap.action_add_event("drum_don", event2)
-	
-	if not InputMap.has_action("drum_ka"):
-		InputMap.add_action("drum_ka")
-		var event3 = InputEventKey.new()
-		event3.keycode = KEY_C
-		InputMap.action_add_event("drum_ka", event3)
-		var event4 = InputEventKey.new()
-		event4.keycode = KEY_V
-		InputMap.action_add_event("drum_ka", event4)
+	print("太鼓达人游戏已准备就绪！")
 
 func _input(event):
 	if event.is_action_pressed("drum_don"):
-		handle_drum_hit(Note.NoteType.DON)
+		print("按下DON按键")
+		# 立即播放DON音效
+		play_drum_sound("DON")
+		handle_drum_hit(DON)
 	elif event.is_action_pressed("drum_ka"):
-		handle_drum_hit(Note.NoteType.KA)
+		print("按下KA按键")
+		# 立即播放KA音效
+		play_drum_sound("KA")
+		handle_drum_hit(KA)
 
-func handle_drum_hit(input_type: Note.NoteType):
+func play_drum_sound(drum_type: String):
+	# 按键时立即播放对应的鼓声
+	print("尝试播放鼓声: ", drum_type)
+	if audio_manager:
+		audio_manager.play_drum_sound(drum_type)
+		print("播放", drum_type, "鼓声")
+	else:
+		print("AudioManager未找到!")
+
+func handle_drum_hit(input_type: int):
 	# 查找最近的匹配音符
 	var closest_note = find_closest_matching_note(input_type)
 	
 	if closest_note:
 		var distance = closest_note.get_distance_to_hit_zone()
+		print("找到音符，距离: ", distance)
 		
 		if distance <= good_window:
 			# 计算准确度
@@ -57,24 +55,34 @@ func handle_drum_hit(input_type: Note.NoteType):
 			# 击中音符
 			closest_note.hit()
 			
-			# 发送信号
-			var note_type_string = "DON" if input_type == Note.NoteType.DON else "KA"
+			# 发送信号（用于分数计算）
+			var note_type_string = "DON" if input_type == DON else "KA"
 			note_hit.emit(note_type_string, accuracy)
+			print("击中音符! 准确度: ", accuracy)
+			
+			# 如果是完美击中，播放额外的完美音效
+			if accuracy >= 0.9 and audio_manager:
+				audio_manager.play_feedback("PERFECT")
+				print("完美击中!")
 		else:
-			# 未命中
+			# 音符距离太远，算作错过
+			print("音符距离太远，错过了")
 			note_missed.emit()
 	else:
-		# 没有找到匹配的音符
-		note_missed.emit()
+		# 没有找到匹配的音符，但这不算错过，只是没有音符可以击打
+		print("没有找到匹配的音符（这是正常的，不算错过）")
 
-func find_closest_matching_note(note_type: Note.NoteType) -> Note:
+func find_closest_matching_note(note_type: int) -> Note:
 	var notes = get_tree().get_nodes_in_group("notes")
 	var closest_note: Note = null
 	var closest_distance = INF
 	
+	print("查找音符，场景中音符数量: ", notes.size())
+	
 	for note in notes:
 		if note is Note and note.note_type == note_type and not note.is_hit:
 			var distance = note.get_distance_to_hit_zone()
+			print("音符类型: ", note.note_type, " 距离: ", distance)
 			if distance < closest_distance and distance <= good_window:
 				closest_distance = distance
 				closest_note = note
@@ -101,5 +109,6 @@ func check_missed_notes():
 		if note is Note and not note.is_hit:
 			# 如果音符已经超过击打区域太远，标记为错过
 			if note.position.x > hit_zone_x + good_window:
+				print("音符超出区域，自动错过")
 				note.queue_free()
 				note_missed.emit() 

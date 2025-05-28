@@ -8,14 +8,18 @@ var spawn_position = Vector2(0, 300)
 var is_spawning = false
 var spawn_timer: Timer
 
+# 音符类型常量
+const DON = 0
+const KA = 1
+
 # 音符模式
 var note_patterns = [
-	[Note.NoteType.DON],
-	[Note.NoteType.KA],
-	[Note.NoteType.DON, Note.NoteType.DON],
-	[Note.NoteType.KA, Note.NoteType.KA],
-	[Note.NoteType.DON, Note.NoteType.KA],
-	[Note.NoteType.KA, Note.NoteType.DON],
+	[DON],
+	[KA],
+	[DON, DON],
+	[KA, KA],
+	[DON, KA],
+	[KA, DON],
 ]
 
 var current_pattern_index = 0
@@ -45,7 +49,7 @@ func spawn_note():
 	var note_instance = note_scene.instantiate()
 	
 	# 设置音符类型（使用简单的随机模式）
-	var note_type = Note.NoteType.DON if randf() > 0.5 else Note.NoteType.KA
+	var note_type = DON if randf() > 0.5 else KA
 	note_instance.note_type = note_type
 	
 	# 设置位置
